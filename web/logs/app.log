@@ -1,0 +1,11 @@
+2025-01-15 10:30:15 [INFO] Application started successfully
+2025-01-15 10:30:16 [INFO] Database connection established
+2025-01-15 10:30:17 [INFO] JWT secret loaded from environment
+2025-01-15 10:30:18 [INFO] Service token configured
+2025-01-15 10:30:19 [INFO] Admin dashboard accessible at /admin
+2025-01-15 10:30:20 [INFO] File download endpoint active
+2025-01-15 10:30:21 [INFO] API client configured with node-fetch 2.6.6
+2025-01-15 10:30:22 [INFO] Redirect following enabled in API client
+2025-01-15 10:30:23 [INFO] All systems operational
+2025-01-15 10:30:24 [INFO] Build 1.4 - dotenv loaded successfully
+2025-01-15 10:30:25 [INFO] Ready to serve financial reports
