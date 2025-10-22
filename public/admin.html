@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - FinCorp</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        .nav {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+        .nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+        .nav a {
+            text-decoration: none;
+            color: #dc3545;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .nav a:hover {
+            background-color: #f0f0f0;
+        }
+        .main-content {
+            padding: 3rem 0;
+        }
+        .admin-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .admin-section h2 {
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .btn {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1rem;
+        }
+        .btn:hover {
+            background: #c82333;
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .status-box {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .error-box {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        .response-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .hint {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        .footer p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        .env-badge {
+            background: #28a745;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>🔒 Admin Dashboard</h1>
+            <p>Internal API Management & System Administration</p>
+        </div>
+    </container>
+
+    <nav class="nav">
+        <div class="container">
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/reports">Download Reports</a></li>
+                <li><a href="/admin">Admin Dashboard</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="status-box">
+                <strong>✅ Admin Access Granted</strong><br>
+                Welcome to the administrative interface. You have full access to internal API endpoints.
+            </div>
+
+            <div class="admin-section">
+                <h2>Internal API Client</h2>
+                <p>Make requests to internal API endpoints. <strong>Follows redirects</strong> automatically.</p>
+                
+                <form id="apiForm">
+                    <div class="form-group">
+                        <label for="method">HTTP Method:</label>
+                        <select id="method" name="method">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="path">API Path:</label>
+                        <input type="text" id="path" name="path" placeholder="/api/redirect?to=https://example.org" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="body">Request Body (for POST/PUT):</label>
+                        <textarea id="body" name="body" placeholder='{"key": "value"}'></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn">Send Request</button>
+                </form>
+                
+                <div id="response"></div>
+            </div>
+
+            <div class="admin-section">
+                <h2>Quick Actions</h2>
+                <p>Common administrative tasks and system checks.</p>
+                
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button onclick="testRedirect()" class="btn btn-secondary">Test Redirect Endpoint</button>
+                    <button onclick="checkHealth()" class="btn btn-secondary">Check API Health</button>
+                    <button onclick="getAdminFlag()" class="btn">Get Admin Flag (FLAG1)</button>
+                    <button onclick="getFlag()" class="btn">Get Service Flag (FLAG2)</button>
+                </div>
+            </div>
+
+            <div class="hint">
+                <strong>💡 Hint:</strong> The API client automatically includes authentication headers and follows redirects. 
+                Try exploring the redirect endpoint to see how it behaves with different URLs.
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 FinCorp Financial Services. All rights reserved.</p>
+            <p>Build 1.4 – <span class="env-badge">dotenv</span> loaded</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('apiForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const method = document.getElementById('method').value;
+            const path = document.getElementById('path').value;
+            const body = document.getElementById('body').value;
+            
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = '<div class="response-box">Sending request...</div>';
+            
+            try {
+                const response = await fetch('/api/admin-request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ method, path, body })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    responseDiv.innerHTML = `<div class="error-box"><strong>Error:</strong> ${result.error}</div>`;
+                } else {
+                    responseDiv.innerHTML = `
+                        <div class="response-box">
+                            <strong>Status:</strong> ${result.status}<br>
+                            <strong>Headers:</strong><br>
+                            ${Object.entries(result.headers).map(([k, v]) => `${k}: ${v}`).join('<br>')}<br><br>
+                            <strong>Body:</strong><br>
+                            ${result.body}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                responseDiv.innerHTML = `<div class="error-box"><strong>Error:</strong> ${error.message}</div>`;
+            }
+        });
+        
+        function testRedirect() {
+            document.getElementById('method').value = 'GET';
+            document.getElementById('path').value = '/api/redirect?to=https://example.org';
+            document.getElementById('body').value = '';
+        }
+        
+        function checkHealth() {
+            document.getElementById('method').value = 'GET';
+            document.getElementById('path').value = '/api/health';
+            document.getElementById('body').value = '';
+        }
+        
+        function getAdminFlag() {
+            fetch('/api/admin-flag')
+                .then(response => response.json())
+                .then(data => {
+                    const responseDiv = document.getElementById('response');
+                    if (data.success) {
+                        responseDiv.innerHTML = `
+                            <div class="status-box">
+                                <strong>🎉 FLAG1 Retrieved!</strong><br>
+                                <strong>Flag:</strong> ${data.flag}<br>
+                                <strong>Message:</strong> ${data.message}<br>
+                                <strong>Explanation:</strong> ${data.explanation}
+                            </div>
+                        `;
+                    } else {
+                        responseDiv.innerHTML = `<div class="error-box"><strong>Error:</strong> ${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    const responseDiv = document.getElementById('response');
+                    responseDiv.innerHTML = `<div class="error-box"><strong>Error:</strong> ${error.message}</div>`;
+                });
+        }
+        
+        function getFlag() {
+            document.getElementById('method').value = 'GET';
+            document.getElementById('path').value = '/api/flag';
+            document.getElementById('body').value = '';
+        }
+    </script>
+</body>
+</html>
