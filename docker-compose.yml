@@ -12,6 +12,7 @@ services:
       - ./env/web.env
     volumes:
       - ./env/web.env:/app/.env:ro
+      - ./public:/app/public:ro
     depends_on:
       - api
     networks:

@@ -56,7 +56,7 @@ echo "-------------------------"
 
 # Test path traversal vulnerability
 echo -n "Testing path traversal vulnerability... "
-traversal_response=$(curl -s "http://localhost:8080/download?path=../../.env")
+traversal_response=$(curl -s "http://localhost:8080/download?path=.env")
 if echo "$traversal_response" | grep -q "WEB_JWT_SECRET"; then
     echo -e "${GREEN}✓ VULNERABLE${NC} (JWT secret exposed)"
 else
@@ -65,7 +65,7 @@ fi
 
 # Test node-fetch version
 echo -n "Testing node-fetch version... "
-web_container=$(docker ps --filter "name=fincorp-web" --format "{{.Names}}" | head -1)
+web_container=$(docker ps --filter "name=web" --format "{{.Names}}" | head -1)
 if [ ! -z "$web_container" ]; then
     node_fetch_version=$(docker exec "$web_container" npm list node-fetch 2>/dev/null | grep "node-fetch@" | cut -d'@' -f2)
     if [ "$node_fetch_version" = "2.6.6" ]; then
@@ -86,7 +86,7 @@ echo "• Admin login: http://localhost:8080/admin/login"
 echo "• Test credentials: admin/admin123"
 echo ""
 echo "🎯 Challenge Stages:"
-echo "1. Extract JWT secret: /download?path=../../.env"
+echo "1. Extract JWT secret: /download?path=.env"
 echo "2. Forge admin JWT and access /admin"
 echo "3. Use admin API client to exploit redirect vulnerability"
 echo "4. Steal service token and call /api/flag"

@@ -58,18 +58,23 @@ app.get('/download', (req, res) => {
     // VULNERABILITY: No path validation - allows directory traversal
     const fullPath = path.join(__dirname, filePath);
     
-    // Check if file exists
-    if (!fs.existsSync(fullPath)) {
-        return res.status(404).json({ error: 'File not found' });
+    try {
+        // Check if file exists
+        if (!fs.existsSync(fullPath)) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+        
+        // Check if it's a file (not directory)
+        if (!fs.statSync(fullPath).isFile()) {
+            return res.status(400).json({ error: 'Path is not a file' });
+        }
+        
+        // VULNERABLE: Read and send file contents (allows reading sensitive files)
+        const content = fs.readFileSync(fullPath, 'utf8');
+        res.type('text/plain').send(content);
+    } catch (error) {
+        res.status(500).json({ error: 'Something went wrong!' });
     }
-    
-    // Check if it's a file (not directory)
-    if (!fs.statSync(fullPath).isFile()) {
-        return res.status(400).json({ error: 'Path is not a file' });
-    }
-    
-    // Send file
-    res.sendFile(fullPath);
 });
 
 // Admin login endpoint (for testing purposes)
