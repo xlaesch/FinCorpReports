@@ -50,20 +50,34 @@ app.get('/api/redirect', (req, res) => {
     
     if (!targetUrl) {
         return res.status(400).json({ 
-            error: 'Missing "to" parameter',
-            example: '/api/redirect?to=https://example.org'
+            error: 'Missing "to" parameter'
         });
     }
     
     // VULNERABILITY: No URL validation - allows redirect to any domain
     // This is intentional for the CTF challenge
-    console.log(`Redirecting to: ${targetUrl}`);
-    
     res.redirect(302, targetUrl);
 });
 
-// Protected flag endpoint
-app.get('/api/flag', requireServiceToken, (req, res) => {
+// Protected flag endpoint - requires valid service token
+app.get('/api/flag', (req, res) => {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ 
+            error: 'Service token required',
+            hint: 'Use Authorization: Bearer <token> header'
+        });
+    }
+    
+    const token = authHeader.substring(7);
+    
+    if (token !== SERVICE_TOKEN) {
+        return res.status(403).json({ 
+            error: 'Invalid service token'
+        });
+    }
+    
     const flag = process.env.FLAG2 || 'CTF{flag2-placeholder-service-token-leaked-via-redirect}';
     
     res.json({
@@ -78,29 +92,14 @@ app.get('/api/flag', requireServiceToken, (req, res) => {
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'healthy', 
-        service: 'api',
-        version: '1.0',
-        endpoints: [
-            'GET /api/redirect?to=<url>',
-            'GET /api/flag (requires service token)',
-            'GET /api/health',
-            'GET /api/download?path=<reports/...|config/...|logs/...>'
-        ]
+        service: 'api'
     });
 });
 
 // Root endpoint
 app.get('/', (req, res) => {
     res.json({
-        service: 'FinCorp Internal API',
-        version: '1.0',
-        message: 'This is an internal API service',
-        endpoints: {
-            redirect: 'GET /api/redirect?to=<url>',
-            flag: 'GET /api/flag (requires Authorization: Bearer <service_token>)',
-            health: 'GET /api/health',
-            download: 'GET /api/download?path=<reports/...|config/...|logs/...>'
-        }
+        service: 'FinCorp Internal API'
     });
 });
 
@@ -165,6 +164,4 @@ app.use((req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`API server running on port ${PORT}`);
-    console.log(`Service Token configured: ${!!SERVICE_TOKEN}`);
-    console.log(`Flag configured: ${!!process.env.FLAG2}`);
 });

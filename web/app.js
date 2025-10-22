@@ -136,15 +136,13 @@ app.get('/admin', requireAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Admin flag endpoint (FLAG1)
+// Admin flag endpoint (FLAG1) - returns confirmation of admin access
 app.get('/api/admin-flag', requireAdmin, (req, res) => {
     const flag1 = process.env.FLAG1 || 'CTF{admin-access-gained-via-jwt-secret-extraction}';
     
     res.json({
         success: true,
-        message: 'Congratulations! You have successfully gained admin access.',
-        flag: flag1,
-        explanation: 'You extracted the JWT secret from the .env file using path traversal and forged an admin token.'
+        flag: flag1
     });
 });
 
@@ -200,9 +198,7 @@ app.post('/api/admin-request', requireAdmin, async (req, res) => {
 app.get('/healthz', (req, res) => {
     res.json({ 
         status: 'healthy', 
-        service: 'web',
-        version: '1.4',
-        env_loaded: !!process.env.WEB_JWT_SECRET
+        service: 'web'
     });
 });
 
@@ -219,6 +215,4 @@ app.use((req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Web server running on port ${PORT}`);
-    console.log(`JWT Secret loaded: ${!!JWT_SECRET}`);
-    console.log(`Service Token loaded: ${!!SERVICE_TOKEN}`);
 });

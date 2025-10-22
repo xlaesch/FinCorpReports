@@ -178,12 +178,12 @@
         <div class="container">
             <div class="status-box">
                 <strong>✅ Admin Access Granted</strong><br>
-                Welcome to the administrative interface. You have full access to internal API endpoints.
+                Welcome to the administrative interface.
             </div>
 
             <div class="admin-section">
                 <h2>Internal API Client</h2>
-                <p>Make requests to internal API endpoints. <strong>Follows redirects</strong> automatically.</p>
+                <p>Make requests to internal API endpoints.</p>
                 
                 <form id="apiForm">
                     <div class="form-group">
@@ -198,35 +198,18 @@
                     
                     <div class="form-group">
                         <label for="path">API Path:</label>
-                        <input type="text" id="path" name="path" placeholder="/api/redirect?to=https://example.org" required>
+                        <input type="text" id="path" name="path" required>
                     </div>
                     
                     <div class="form-group">
                         <label for="body">Request Body (for POST/PUT):</label>
-                        <textarea id="body" name="body" placeholder='{"key": "value"}'></textarea>
+                        <textarea id="body" name="body"></textarea>
                     </div>
                     
                     <button type="submit" class="btn">Send Request</button>
                 </form>
                 
                 <div id="response"></div>
-            </div>
-
-            <div class="admin-section">
-                <h2>Quick Actions</h2>
-                <p>Common administrative tasks and system checks.</p>
-                
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <button onclick="testRedirect()" class="btn btn-secondary">Test Redirect Endpoint</button>
-                    <button onclick="checkHealth()" class="btn btn-secondary">Check API Health</button>
-                    <button onclick="getAdminFlag()" class="btn">Get Admin Flag (FLAG1)</button>
-                    <button onclick="getFlag()" class="btn">Get Service Flag (FLAG2)</button>
-                </div>
-            </div>
-
-            <div class="hint">
-                <strong>💡 Hint:</strong> The API client automatically includes authentication headers and follows redirects. 
-                Try exploring the redirect endpoint to see how it behaves with different URLs.
             </div>
         </div>
     </main>
@@ -277,48 +260,6 @@
                 responseDiv.innerHTML = `<div class="error-box"><strong>Error:</strong> ${error.message}</div>`;
             }
         });
-        
-        function testRedirect() {
-            document.getElementById('method').value = 'GET';
-            document.getElementById('path').value = '/api/redirect?to=https://example.org';
-            document.getElementById('body').value = '';
-        }
-        
-        function checkHealth() {
-            document.getElementById('method').value = 'GET';
-            document.getElementById('path').value = '/api/health';
-            document.getElementById('body').value = '';
-        }
-        
-        function getAdminFlag() {
-            fetch('/api/admin-flag')
-                .then(response => response.json())
-                .then(data => {
-                    const responseDiv = document.getElementById('response');
-                    if (data.success) {
-                        responseDiv.innerHTML = `
-                            <div class="status-box">
-                                <strong>🎉 FLAG1 Retrieved!</strong><br>
-                                <strong>Flag:</strong> ${data.flag}<br>
-                                <strong>Message:</strong> ${data.message}<br>
-                                <strong>Explanation:</strong> ${data.explanation}
-                            </div>
-                        `;
-                    } else {
-                        responseDiv.innerHTML = `<div class="error-box"><strong>Error:</strong> ${data.error}</div>`;
-                    }
-                })
-                .catch(error => {
-                    const responseDiv = document.getElementById('response');
-                    responseDiv.innerHTML = `<div class="error-box"><strong>Error:</strong> ${error.message}</div>`;
-                });
-        }
-        
-        function getFlag() {
-            document.getElementById('method').value = 'GET';
-            document.getElementById('path').value = '/api/flag';
-            document.getElementById('body').value = '';
-        }
     </script>
 </body>
 </html>
