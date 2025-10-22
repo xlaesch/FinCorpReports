@@ -1,5 +1,7 @@
 # FinCorp Financial Reports CTF Challenge
 
+Note: This CTF intentionally exposes a vulnerable download route at the web app's `/download` endpoint to demonstrate path traversal and env-secret exposure.
+
 This is a Capture The Flag (CTF) challenge involving a financial company's website with two distinct vulnerabilities.
 
 ## Challenge Overview
@@ -50,9 +52,7 @@ The challenge consists of two stages:
 ## Vulnerabilities
 
 ### 1. Path Traversal (`/download` endpoint)
-- **File**: `web/app.js` line ~45
-- **Issue**: No path validation allows `../../` traversal
-- **Exploit**: `/download?path=../../.env`
+- Status: Intentionally vulnerable. The `/download` route in `web/app.js` performs unsafe path joining, allowing traversal to `.env`.
 
 ### 2. Node-fetch Redirect Header Leak
 - **File**: `web/app.js` line ~95
@@ -68,7 +68,7 @@ The challenge consists of two stages:
 
 1. **Test path traversal:**
    ```bash
-   curl "http://localhost:8080/download?path=../../.env"
+   curl "http://localhost:8080/download?path=.env"
    ```
 
 2. **Test admin login:**
@@ -81,6 +81,11 @@ The challenge consists of two stages:
 3. **Test API redirect:**
    ```bash
    curl "http://localhost:3001/api/redirect?to=https://httpbin.org/get"
+   ```
+
+4. **Test file download via vulnerable route:**
+   ```bash
+   curl -I "http://localhost:8080/download?path=reports/q1-2025.pdf"
    ```
 
 ## Security Notes

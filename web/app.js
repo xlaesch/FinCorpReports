@@ -47,7 +47,9 @@ app.get('/reports', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'reports.html'));
 });
 
-// VULNERABLE: Path traversal in download endpoint
+// INTENTIONALLY VULNERABLE: Path traversal in download endpoint (for CTF)
+// This endpoint allows reading arbitrary files relative to the app directory,
+// including the mounted .env file, enabling the challenge.
 app.get('/download', (req, res) => {
     const filePath = req.query.path;
     
@@ -55,25 +57,53 @@ app.get('/download', (req, res) => {
         return res.status(400).json({ error: 'Path parameter required' });
     }
     
-    // VULNERABILITY: No path validation - allows directory traversal
+    // Vulnerable join without normalization or whitelist
     const fullPath = path.join(__dirname, filePath);
     
     try {
-        // Check if file exists
         if (!fs.existsSync(fullPath)) {
             return res.status(404).json({ error: 'File not found' });
         }
-        
-        // Check if it's a file (not directory)
         if (!fs.statSync(fullPath).isFile()) {
             return res.status(400).json({ error: 'Path is not a file' });
         }
-        
-        // VULNERABLE: Read and send file contents (allows reading sensitive files)
         const content = fs.readFileSync(fullPath, 'utf8');
         res.type('text/plain').send(content);
     } catch (error) {
         res.status(500).json({ error: 'Something went wrong!' });
+    }
+});
+
+// Proxy download requests to the API service (API is the source of truth for files)
+app.get('/api/download', async (req, res) => {
+    const relPath = req.query.path;
+    if (!relPath) {
+        return res.status(400).json({ error: 'Path parameter required' });
+    }
+
+    try {
+        const apiUrl = `http://api:3001/api/download?path=${encodeURIComponent(relPath)}`;
+        const apiRes = await fetch(apiUrl);
+
+        // Forward status
+        res.status(apiRes.status);
+
+        // Forward key headers for downloads
+        const disposition = apiRes.headers.get('content-disposition');
+        const contentType = apiRes.headers.get('content-type');
+        if (disposition) res.setHeader('Content-Disposition', disposition);
+        if (contentType) res.setHeader('Content-Type', contentType);
+
+        // Stream the response body
+        if (apiRes.body) {
+            apiRes.body.pipe(res);
+        } else {
+            const text = await apiRes.text();
+            res.send(text);
+        }
+    } catch (err) {
+        console.error('Proxy download error:', err);
+        res.status(502).json({ error: 'Failed to proxy download request' });
     }
 });
 

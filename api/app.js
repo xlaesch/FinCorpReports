@@ -1,12 +1,25 @@
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3001;
+const path = require('path');
+const fs = require('fs');
 
 // Middleware
 app.use(express.json());
 
 // Service token for authentication
 const SERVICE_TOKEN = process.env.SERVICE_TOKEN || 'service-token-123';
+// Directories allowed for downloads (mapped by top-level segment)
+const REPORTS_DIR = process.env.REPORTS_DIR || '/app/reports';
+const CONFIG_DIR = process.env.CONFIG_DIR || '/app/config';
+const LOGS_DIR = process.env.LOGS_DIR || '/app/logs';
+
+// Map the first path segment to an absolute base directory
+const ALLOWED_DOWNLOAD_MAP = Object.freeze({
+    reports: REPORTS_DIR,
+    config: CONFIG_DIR,
+    logs: LOGS_DIR,
+});
 
 // Middleware to check service token authentication
 function requireServiceToken(req, res, next) {
@@ -70,7 +83,8 @@ app.get('/api/health', (req, res) => {
         endpoints: [
             'GET /api/redirect?to=<url>',
             'GET /api/flag (requires service token)',
-            'GET /api/health'
+            'GET /api/health',
+            'GET /api/download?path=<reports/...|config/...|logs/...>'
         ]
     });
 });
@@ -84,9 +98,51 @@ app.get('/', (req, res) => {
         endpoints: {
             redirect: 'GET /api/redirect?to=<url>',
             flag: 'GET /api/flag (requires Authorization: Bearer <service_token>)',
-            health: 'GET /api/health'
+            health: 'GET /api/health',
+            download: 'GET /api/download?path=<reports/...|config/...|logs/...>'
         }
     });
+});
+
+// Secure file download endpoint
+// Contract:
+// - Input: query param `path` starting with one of: reports/, config/, logs/
+// - Output: initiates file download with Content-Disposition header
+// - Errors: 400 on bad input, 404 on missing file, 500 on unexpected error
+app.get('/api/download', (req, res) => {
+    const relPath = req.query.path;
+    if (!relPath || typeof relPath !== 'string') {
+        return res.status(400).json({ error: 'Query parameter "path" is required' });
+    }
+
+    // Extract top-level segment to map to base dir
+    const [segment, ...restParts] = relPath.split('/');
+    const baseDir = ALLOWED_DOWNLOAD_MAP[segment];
+    if (!baseDir) {
+        return res.status(400).json({ error: 'Invalid path segment. Allowed: reports/, config/, logs/' });
+    }
+
+    // Build absolute path safely and prevent traversal
+    const targetPath = path.resolve(baseDir, restParts.join('/'));
+    if (!targetPath.startsWith(path.resolve(baseDir) + path.sep)) {
+        return res.status(400).json({ error: 'Invalid path' });
+    }
+
+    try {
+        if (!fs.existsSync(targetPath)) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+        const stat = fs.statSync(targetPath);
+        if (!stat.isFile()) {
+            return res.status(400).json({ error: 'Path is not a file' });
+        }
+
+        // Use Express helper to set appropriate headers and stream file
+        return res.download(targetPath, path.basename(targetPath));
+    } catch (err) {
+        console.error('Download error:', err);
+        return res.status(500).json({ error: 'Failed to download file' });
+    }
 });
 
 // Error handling middleware

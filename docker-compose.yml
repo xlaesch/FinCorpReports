@@ -35,6 +35,9 @@ services:
       - ./env/api.env
     volumes:
       - ./env/api.env:/app/.env:ro
+      - ./web/reports:/app/reports:ro
+      - ./web/config:/app/config:ro
+      - ./web/logs:/app/logs:ro
     networks:
       - fincorp-network
     healthcheck:
